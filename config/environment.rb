@@ -3,8 +3,12 @@ require 'bundler/setup' if File.exist?(ENV['BUNDLE_GEMFILE'])
 
 require "rails"
 
-# comment out this line to see test pass?!
-require "active_record/railtie"
+# comment out this module and class declaration to see tests pass.
+module ActiveRecord
+  class Base
+  end
+end
+require "action_controller/railtie"
 
 Bundler.require(*Rails.groups)
 
