@@ -1,6 +1,6 @@
 ## README
 
-This is a toy app to reproduce an error with Cucumber, Poltergeist, and Ruby 2.1.x incorrectly returning a zero status code on a failing feature.
+This is a toy app to reproduce an error with Cucumber-Rails, Poltergeist, and Ruby 2.1.x incorrectly returning a zero status code on a failing feature.
 
 To reproduce:
 
@@ -8,14 +8,13 @@ To reproduce:
 2. make sure you're respecting .ruby-version and on ruby-2.1.1
 3. bundle
 4. bundle exec rake
-5. test should fail
+5. tests should fail
 
-I have found four ways to get this test to pass:
+This bug appears to have three constituents. Remove any one of these, and the problem disappears.
 
-1. Comment out `Capybara.default_driver = :poltergeist` in `features/support/env.rb`. This one suggests Poltergeist is the culprit. However...
-2. Replace the testing command in `Rakefile` with `rspec`, using an identical test written with RSpec and Poltergeist. This confirms that cucumber's involvement is part of the problem. However...
-3. Comment out `require 'active_record/railtie'` in `config/environment.rb`. Yeah, what? This one really throws me for a loop.
-4. Downgrade Ruby to 2.0.0. ???
+1. Minitest.autorun (loaded by cucumber/rails via rails/test_help via active_support/testing/autorun when ActiveRecord::Base is present)
+2. Poltergeist driver
+3. Ruby 2.1.x
 
-So it appears that this bug is due to the combination of all four components?? I think I've pushed this as far as I can. I'm not familiar with the internals of Cucumber, Poltergeist, ActiveRecord, or Ruby. Anyone have any insight?
+The gist of it is that Minitest.autorun is clearly messing with the exit codes. However, I don't think that Minitest is solely to blame, because the problem disappears when using rack-test instead of poltergeist. Cucumber includes a project named multi_test that attempts to clobber other gem's exit code shenanigans, but this seems like a bandaid... I think it'd be ideal to track down the error itself. And why does this only happen with Ruby 2.1?
 
