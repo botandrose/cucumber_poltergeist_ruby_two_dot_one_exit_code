@@ -1,10 +1,18 @@
-task :default do
-  output = `cucumber 2>&1`
-  nonzero_status = !$?.success?
-  assert nonzero_status, "ERROR: cucumber should have exited with non-zero status, but did not"
+require "minitest"
+
+class TestExitCodes < Minitest::Test
+  def test_rspec
+    output = `rspec 2>&1`
+    refute $?.success?, "rspec should have exited with non-zero status, but did not"
+  end
+
+  def test_cucumber
+    output = `cucumber 2>&1`
+    refute $?.success?, "cucumber should have exited with non-zero status, but did not"
+  end
 end
 
-def assert bool, message
-  raise message unless bool
+task :default do
+  Minitest.run
 end
 
